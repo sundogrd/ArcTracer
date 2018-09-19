@@ -1,0 +1,15 @@
+# node
+node_modules
+npm-debug.log
+
+# bower
+bower_components
+
+# editors
+.vscode
+.idea
+*.swp
+*.swo
+
+# system
+.DS_Store
