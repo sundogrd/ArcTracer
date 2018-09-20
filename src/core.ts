@@ -1,12 +1,17 @@
-import Interface from './protocols/interface';
-import IndexeddbLogger from './protocols/indexeddb';
-import LocalstorageLogger from './protocols/localstorage';
-import WebsqlLogger from './protocols/websql';
+/**
+ * @file core.ts
+ * @description core file
+ * @author Yuyi Liang <liang.pearce@gmail.com>
+ */
+
+import * as config from './lib/config';
 import * as util from './lib/util';
-import config from './lib/config';
+import indexeddb from './protocols/indexeddb';
+import interface from './protocols/interface';
+import localstorage from './protocols/localstorage';
+import websql from './protocols/websql';
 
-
-class Logline {
+class ArcTracer {
     /**
      * Logline constructor
      * @constructor
@@ -44,7 +49,7 @@ class Logline {
      * @param {Object Protocol Class} protocol - protocol to use, must under Logline.PROTOCOL
      * @return {Object} Logline
      */
-    static _initProtocol(protocol) {
+    public static _initProtocol(protocol) {
         Logline._protocol = protocol;
         Logline._protocol.init(Logline._database || 'logline');
     }
@@ -57,7 +62,7 @@ class Logline {
      * @private
      * @static
      */
-    static _checkProtocol() {
+    public static _checkProtocol() {
         if (!Logline._protocol) {
             let protocols = Object.keys(Logline.PROTOCOL), protocol;
             while ((protocol = Logline.PROTOCOL[protocols.shift()])) {
@@ -80,7 +85,7 @@ class Logline {
      * @param {String} [to] - time end
      * @param {Function} readyFn - function to call back with logs as parameter
      */
-    static get(from, to, readyFn) {
+    public static get(from, to, readyFn) {
         Logline._checkProtocol();
 
         switch (arguments.length) {
@@ -94,7 +99,6 @@ class Logline {
                 break;
             case 3:
             default:
-                break;
         }
 
         Logline._protocol.get(from, to, readyFn);
@@ -106,7 +110,7 @@ class Logline {
      * @static
      * @param {Function} readyFn - function to call back with logs as parameter
      */
-    static all(readyFn) {
+    public static all(readyFn) {
         Logline.get(readyFn);
     }
 
@@ -117,7 +121,7 @@ class Logline {
      * @param {String} daysToMaintain - specialfy days to keep, support human readable format such as '3d', '.3'
      * @return {Object} Logline
      */
-    static keep(daysToMaintain) {
+    public static keep(daysToMaintain) {
         Logline._checkProtocol();
         Logline._protocol.keep(daysToMaintain);
         return this;
@@ -129,7 +133,7 @@ class Logline {
      * @static
      * @return {Object} Logline
      */
-    static clean() {
+    public static clean() {
         Logline._checkProtocol();
         Logline._protocol.clean();
         return this;
@@ -143,7 +147,7 @@ class Logline {
      * @param {String} [database] - custome database name
      * @return {Object} Logline
      */
-    static using(protocol, database) {
+    public static using(protocol, database) {
         // protocol unavailable is not allowed
         if (-1 === [IndexeddbLogger, LocalstorageLogger, WebsqlLogger].indexOf(protocol)) {
             util.throwError('specialfied protocol ' + (protocol ? (protocol + ' ') : '') + 'is not available');
@@ -165,7 +169,7 @@ class Logline {
      * @static
      * @param {String} name - target database name
      */
-    static database(name) {
+    public static database(name) {
         Logline._database = name;
     }
 }
@@ -174,7 +178,7 @@ class Logline {
 Logline.PROTOCOL = {
     INDEXEDDB: IndexeddbLogger,
     LOCALSTORAGE: LocalstorageLogger,
-    WEBSQL: WebsqlLogger
+    WEBSQL: WebsqlLogger,
 };
 
 // export protocol interface for user custom implements
@@ -182,7 +186,9 @@ Logline.INTERFACE = Object.freeze(Interface);
 
 // export Logline env, just like Unix Environment variables
 Logline.env = {
-    verbose: true
+    verbose: true,
 };
 
-export default Logline;
+export {
+    Logline
+};
